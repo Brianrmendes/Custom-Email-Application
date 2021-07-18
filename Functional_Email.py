@@ -1,3 +1,5 @@
+import tkinter
+import webbrowser
 from tkinter import *
 from PIL import ImageTk
 from tkinter import messagebox, filedialog
@@ -5,11 +7,8 @@ import os
 import pandas as pd
 import email_function
 import time
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
-import smtplib
+import email_function2
+
 
 
 class emails:
@@ -74,41 +73,75 @@ class emails:
         self.lbl_failed = Label(self.root, font=("times new roman", 18), bg="white", fg="red")
         self.lbl_failed.place(x=550, y=490)
 
-        self.button_attach = Button(self.root, command=self.add_attachments, text="Send Attachment",
-                                    font=("times new roman ", 13, "bold"), bg="#8FAADC", fg="#262626",
-                                    activebackground="#262626", activeforeground="#262626", cursor="hand2", )
+        # self.button_attach = Button(self.root, command=self.add_attachments, text="Read Attachment",
+        #                             font=("times new roman ", 13, "bold"), bg="#8FAADC", fg="#262626",
+        #                             activebackground="#262626", activeforeground="#262626", cursor="hand2")
+        #
+        # self.button_attach.place(x=670, y=490, width=160, height=30)
 
-        self.button_attach.place(x=770, y=300, width=160, height=30)
+        self.button_browse2 = Button(self.root, command=self.attachFiles, text="Send Attachment",
+                                     font=("times new roman ", 13, "bold"), bg="orange", fg="#262626",
+                                     activebackground="#262626", activeforeground="#262626", cursor="hand2")
 
-        button_send = Button(self.root, command=self.send_email, text="SEND", font=("times new roman ", 18, "bold"), bg="#00B0F0", fg="white",
-                             activebackground="#262626", activeforeground="white", cursor="hand2").place(x=830, y=490, width=120,height=30)
-        button_clear = Button(self.root, text="CLEAR", command=self.clear1, font=("times new roman ", 18, "bold"),bg="#262626", fg="white",
-                              activebackground="#00B0F0", activeforeground="white", cursor="hand2").place(x=700, y=490, width=120,height=30)
+        self.button_browse2.place(x=770, y=300, width=180, height=30)
+
+
+
+        button_send = Button(self.root, command=self.send_email, text="SEND", font=("times new roman ", 18, "bold"),
+                             bg="#00B0F0", fg="white",
+                             activebackground="#262626", activeforeground="white", cursor="hand2").place(x=830, y=490,
+                                                                                                         width=120,
+                                                                                                         height=30)
+        button_clear = Button(self.root, text="CLEAR", command=self.clear1, font=("times new roman ", 18, "bold"),
+                              bg="#262626", fg="white",
+                              activebackground="#00B0F0", activeforeground="white", cursor="hand2").place(x=700, y=490,
+                                                                                                          width=120,
+                                                                                                            height=30)
 
         self.check_file_exist()
 
+    # def add_files(self):
+    #     email_attach = email_function2.attachm()
+
+    def attachFiles(self):
+        if self.var_choice.get() == "single":
+
+            email_attach = email_function2.attach_single(self.txt_to.get(), self.txt_sub.get(), self.txt_msg.get('1.0', END),
+                                                  self.from_email, self.password)
+
+            if email_attach == "s":
+                messagebox.showinfo("Success", "Email has been sent", parent=self.root)
+            if email_attach == "f":
+                messagebox.showerror("Error", "Email not sent", parent=self.root)
+
+        if self.var_choice.get() == "bulk":
+            email_attach = email_function2.attach_mul(self.txt_to.get(), self.txt_sub.get(), self.txt_msg.get('1.0', END),
+                                                  self.from_email, self.password)
+
+            if email_attach == "s":
+                messagebox.showinfo("Success", "Email has been sent", parent=self.root)
+            if email_attach == "f":
+                messagebox.showerror("Error", "Email not sent", parent=self.root)
+
     def add_attachments(self):
-        fromaddr = self.from_email
-        toaddr = "enter the email who you wish to send mail"
-        msg = MIMEMultipart()
-        msg['From'] = fromaddr
-        msg['To'] = toaddr
-        msg['Subject'] = "Email Attachment"
-        body = "Hello User"
-        msg.attach(MIMEText(body, 'plain'))
-        filename = "test1.xlsx"
-        attachment = open("E:/FrAgnel/Internship_stuff/Discover_Technologies/Projects/Gmail/test1.xlsx", "rb")
-        p = MIMEBase('application', 'octet-stream')
-        p.set_payload((attachment).read())
-        encoders.encode_base64(p)
-        p.add_header('Content-Disposition', "attachment; filename= %s" % filename)
-        msg.attach(p)
-        s = smtplib.SMTP('smtp.gmail.com', 587)
-        s.starttls()
-        s.login(fromaddr, self.password)
-        text = msg.as_string()
-        s.sendmail(fromaddr, toaddr, text)
-        s.quit()
+        if self.var_choice.get() == "single":
+            status2 = email_function2.email_send_funct_next(self.txt_to.get(), self.txt_sub.get(),
+                                                            self.txt_msg.get('1.0', END),
+                                                            self.from_email, self.password)
+
+            if status2 == "s":
+                messagebox.showinfo("Success", "Email has been sent", parent=self.root)
+            if status2 == "f":
+                messagebox.showerror("Error", "Email not sent", parent=self.root)
+
+        if self.var_choice.get() == "bulk":
+            status2 = email_function2.email_send_funct_next(self.txt_to.get(), self.txt_sub.get(),
+                                                            self.txt_msg.get('1.0', END), self.from_email,
+                                                            self.password)
+            if status2 == "s":
+                messagebox.showinfo("Success", "Email has been sent", parent=self.root)
+            if status2 == "f":
+                messagebox.showerror("Error", "Email not sent", parent=self.root)
 
     def browse_file(self):
         op = filedialog.askopenfile(initialdir='/', title="Select Excel File For Emails",
@@ -153,7 +186,8 @@ class emails:
                 self.s_count = 0
                 self.f_count = 0
                 for x in self.emails:
-                    status = email_function.email_send_funct(x, self.txt_sub.get(), self.txt_msg.get('1.0', END),self.from_email, self.password)
+                    status = email_function.email_send_funct(x, self.txt_sub.get(), self.txt_msg.get('1.0', END),
+                                                             self.from_email, self.password)
                     if status == "s":
                         self.s_count += 1
                     if status == "f":
@@ -220,11 +254,24 @@ class emails:
         self.txt_pass = Entry(self.root2, font=("times new roman", 14), bg="lightyellow", show="*")
         self.txt_pass.place(x=250, y=200, width=330, height=30)
 
+        button_redirect = Button(self.root2, command=self.button_redirect, text="Click to enable ",
+                                 font=("times new roman ", 18, "bold"),
+                                 bg="red", fg="white",
+                                 activebackground="#262626", activeforeground="white", cursor="hand2").place(x=50,
+                                                                                                             y=260,
+                                                                                                             width=200,
+                                                                                                             height=30)
+
         button_save = Button(self.root2, command=self.save_setting, text="SAVE", font=("times new roman ", 18, "bold"),
                              bg="#00B0F0", fg="white",
-                             activebackground="#262626", activeforeground="white", cursor="hand2").place(x=430, y=260,width=120,height=30)
-        button_clear2 = Button(self.root2, command=self.clear2, text="CLEAR", font=("times new roman ", 18, "bold"), bg="#262626", fg="white",
-                               activebackground="#00B0F0", activeforeground="white", cursor="hand2").place(x=300, y=260, width=120, height=30)
+                             activebackground="#262626", activeforeground="white", cursor="hand2").place(x=430, y=260,
+                                                                                                         width=120,
+                                                                                                         height=30)
+        button_clear2 = Button(self.root2, command=self.clear2, text="CLEAR", font=("times new roman ", 18, "bold"),
+                               bg="#262626", fg="white",
+                               activebackground="#00B0F0", activeforeground="white", cursor="hand2").place(x=300, y=260,
+                                                                                                           width=120,
+                                                                                                           height=30)
         self.txt_from.insert(0, self.from_email)
         self.txt_pass.insert(0, self.password)
 
@@ -243,6 +290,11 @@ class emails:
             self.credentials.append([i.split(",")[0], i.split(",")[1]])
         self.from_email = self.credentials[0][0]
         self.password = self.credentials[0][1]
+
+    def button_redirect(self):
+        new = 1
+        url = "https://myaccount.google.com/security"
+        webbrowser.open(url, new=new)
 
     def save_setting(self):
         if self.txt_from.get() == "" or self.txt_pass.get() == "":
